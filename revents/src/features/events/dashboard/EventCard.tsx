@@ -1,14 +1,17 @@
+//import { select } from "motion/react-client";
 import type { AppEvent } from "../../../lib/types";
 import EventAttendees from "./EventAttendees";
 
 type Props = {
     event: AppEvent;
+    formToggle: (event: AppEvent) => void;
+    deleteEvent?: (eventId: string) => void;
 }
 
-export default function EventCard({event}: Props) {
+export default function EventCard({ event, formToggle, deleteEvent }: Props) {
 
     const host = event.attendees.find(x => x.id === event.hostUid);
-    
+
     return (
         <div className="card card-border bg-base-100 w-full">
             <div className="card-body">
@@ -31,7 +34,10 @@ export default function EventCard({event}: Props) {
                     <div className="flex flex-1">
                         {event.description}
                     </div>
-                    <button className="btn btn-primary">View</button>
+                    <div className="flex gap-3">
+                        <button onClick={() => deleteEvent?.(event.id)} className="btn btn-error">Delete</button>
+                        <button onClick={() => formToggle(event)} className="btn btn-primary">Edit</button>
+                    </div>
                 </div>
             </div>
         </div>
