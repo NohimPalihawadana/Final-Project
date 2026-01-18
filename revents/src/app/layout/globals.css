@@ -36,3 +36,8 @@
   --depth: 1;
   --noise: 0;
 }
+
+
+a.active{
+  @apply text-accent;
+}
