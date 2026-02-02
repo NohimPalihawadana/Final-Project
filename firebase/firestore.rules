@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function role() { return request.auth.token.role; } // recommended: custom claims
+    function hasRole(r) { return isSignedIn() && role() == r; }
+    function isAdmin() { return hasRole('ADMIN'); }
+
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      // Only admin should manage users in production.
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /transactions/{id} {
+      allow read: if isSignedIn();
+
+      allow create: if hasRole('CLERK');
+
+      // Clerk can edit only when existing is CREATED
+      allow update: if
+        (hasRole('CLERK') && resource.data.status == 'CREATED') ||
+
+        // Officer marks CREATED -> PAID
+        (hasRole('OFFICER') &&
+          resource.data.status == 'CREATED' &&
+          request.resource.data.status == 'PAID') ||
+
+        // Account manager approves/declines only if PAID
+        (hasRole('ACCOUNT_MANAGER') &&
+          resource.data.status == 'PAID' &&
+          (request.resource.data.status == 'DECLINED' || request.resource.data.status == 'CLOSED')) ||
+
+        // Admin can edit any
+        isAdmin();
+    }
+
+    match /financial-records/{month} {
+      allow read: if isSignedIn();
+      // Recommend: write only via Cloud Function, or Admin/Manager only.
+      allow write: if isAdmin() || hasRole('ACCOUNT_MANAGER');
+    }
+
+    match /activity-logs/{id} {
+      allow read: if isSignedIn() && (isAdmin() || hasRole('ACCOUNT_MANAGER'));
+      // Recommend: write via Cloud Function. Allow signed-in for dev.
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+  }
+}
