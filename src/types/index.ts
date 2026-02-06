@@ -14,6 +14,13 @@ export interface AppUser {
   updatedAt?: number
 }
 
+export interface SubAccount {
+  createdAt: string
+  date: string
+  name: string
+  description: string
+}
+
 export interface Transaction {
   id: string
   date: ISODate
@@ -32,6 +39,8 @@ export interface Transaction {
 
   createdAt: number
   updatedAt: number
+
+  subAccount: string
 }
 
 export interface ActivityLog {

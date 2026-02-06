@@ -8,18 +8,21 @@ export async function createTransaction(args: {
   amount: number
   type: TransactionType
   createdBy: string
+  subAccount: string | null
+  assignedOfficerUid: string | null 
 }) {
-  const status = args.type  === 'CREDIT' ? 'PAID' : 'PENDING';
   const now = Date.now()
   await addDoc(col('transactions'), {
     date: args.date,
     description: args.description.trim(),
     amount: args.amount,
     type: args.type,
-    status: status as TransactionStatus,
+    status: 'PENDING' as TransactionStatus,
+    subAccount: args.subAccount,
     createdBy: args.createdBy,
     createdAt: now,
     updatedAt: now,
+    assignedOfficerUid: args.assignedOfficerUid
   })
 }
 
@@ -29,6 +32,8 @@ export async function updateTransactionEditableByClerk(args: {
   description: string
   amount: number
   type: TransactionType
+  subAccount: string
+  assignedOfficerUid: string
 }) {
   const txSnap = await getDoc(ref(`transactions/${args.id}`))
   if (!txSnap.exists()) throw new Error('Transaction not found')
@@ -41,6 +46,8 @@ export async function updateTransactionEditableByClerk(args: {
     description: args.description.trim(),
     amount: args.amount,
     type: args.type,
+    subAccount: args.subAccount,
+    assignedOfficerUid: args.assignedOfficerUid,
     updatedAt: Date.now(),
   })
 }
@@ -76,7 +83,6 @@ export async function approveTransaction(args: { id: string; managerUid: string 
   if (!txSnap.exists()) throw new Error('Transaction not found')
   const tx = txSnap.data() as Transaction
 
-  if (tx.status !== 'PAID') throw new Error('Cannot approve without payment')
 
   await updateDoc(ref(`transactions/${args.id}`), {
     status: 'APPROVED',
@@ -142,7 +148,7 @@ export async function fetchTransactionsForRole(args: {
 
   // Manager: PAID transactions to approve/decline
   if (args.role === 'ACCOUNT_MANAGER') {
-    const q = query(col('transactions'), where('status', '==', 'PAID'), orderBy('updatedAt', 'desc'))
+    const q = query(col('transactions'), where('status', '==', 'PENDING'), where('assignedOfficerUid', '==', null ), orderBy('updatedAt', 'desc'))
     const snap = await getDocs(q)
     return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Transaction, 'id'>) }))
   }

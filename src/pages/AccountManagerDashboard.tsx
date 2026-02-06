@@ -109,7 +109,7 @@ export default function AccountManagerDashboard() {
                   <Td>{formatISODate(t.date)}</Td>
                   <Td>{t.description}</Td>
                   <Td>{formatMoney(t.amount)}</Td>
-                  <Td><Badge text="PAID" tone="warning" /></Td>
+                  <Td><Badge text="PENDING" tone="warning" /></Td>
                   <Td>
                     <div className="flex gap-2">
                       <Button

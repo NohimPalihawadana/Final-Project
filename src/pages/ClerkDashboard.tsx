@@ -13,8 +13,11 @@ import { Badge } from '@/components/Badge'
 import { Modal } from '@/components/Modal'
 import { formatMoney } from '@/utils/currency'
 import { formatISODate, todayISO } from '@/utils/date'
-import type { Transaction, TransactionType } from '@/types'
+import type { SubAccount, Transaction, TransactionType } from '@/types'
 import { fetchOfficers, UserListItem } from '@/features/users/usersService'
+import { fetchSubAccounts } from '@/features/subAccounts/subAccountsService'
+import CreateClerkTransaction from './components/CreateClerkTransaction'
+import CreateOfficerTransaction from './components/CreateOfficerTransaction'
 
 export default function ClerkDashboard() {
   const dispatch = useAppDispatch()
@@ -30,18 +33,27 @@ export default function ClerkDashboard() {
   const [editReason, setEditReason] = useState<string | null>(null)
 
   const [officers, setOfficers] = useState<UserListItem[]>([])
-const [selectedOfficerUid, setSelectedOfficerUid] = useState('')
+  const [subAccounts, setSubAccounts] = useState<SubAccount[]>([])
+  const [selectedOfficerUid, setSelectedOfficerUid] = useState('')
+  const [selectedSubAccount, setSelectedSubAccount] = useState('')
 
-useEffect(() => {
-  fetchOfficers()
-    .then((list) => {
-      setOfficers(list)
-      // default to first officer if you want
-      if (list.length && !selectedOfficerUid) setSelectedOfficerUid(list[0].uid)
-    })
-    .catch(() => {})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [])
+
+  useEffect(() => {
+    fetchOfficers()
+      .then((list) => {
+        setOfficers(list)
+        // default to first officer if you want
+        if (list.length && !selectedOfficerUid) setSelectedOfficerUid(list[0].uid)
+      })
+      .catch(() => { })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    fetchSubAccounts()
+      .then((list) => {
+        setSubAccounts(list)
+      })
+      .catch(() => { })
+  }, [])
 
   useEffect(() => {
     if (profile?.uid) dispatch(clerkFetchMyTransactionsThunk(profile.uid))
@@ -72,6 +84,8 @@ useEffect(() => {
         description,
         amount: amt,
         type,
+        subAccount: selectedSubAccount,
+        assignedOfficerUid: null
       }),
     )
     setDescription('')
@@ -81,37 +95,8 @@ useEffect(() => {
 
   return (
     <div className="page space-y-6">
-      <div className="card p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-xl font-semibold">Clerk</div>
-            <div className="mt-1 text-sm text-slate-600">Create transactions. You can edit only until it is paid.</div>
-          </div>
-          <Button variant="secondary" onClick={() => profile?.uid && dispatch(clerkFetchMyTransactionsThunk(profile.uid))} loading={loading}>
-            Refresh
-          </Button>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-          <Input label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          <Input label="Description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. Office supplies" />
-          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 120.50" />
-          <Select label="Type" value={type} onChange={(e) => setType(e.target.value as any)}>
-            <option value="DEBIT">DEBIT</option>
-            <option value="CREDIT">CREDIT</option>
-          </Select>
-        </div>
-          <Select>
-            <option></option>
-            <option></option>
-          </Select>
-
-        <div className="mt-4">
-          <Button onClick={onCreate}>Create transaction</Button>
-        </div>
-
-        {error ? <div className="mt-3 text-sm text-rose-600">{error}</div> : null}
-      </div>
+      <CreateClerkTransaction subAccounts={subAccounts} selectedSubAccount ={subAccounts?.length ? subAccounts[0].name : ''} />
+      <CreateOfficerTransaction officers={officers} selectedOfficerId ={officers?.length ? officers[0].uid : ''} />
 
       <div className="card p-6">
         <div className="text-lg font-semibold">My transactions</div>
@@ -223,6 +208,8 @@ useEffect(() => {
               description: editTx.description,
               amount: editTx.amount,
               type: editTx.type,
+              subAccount: editTx.subAccount,
+              assignedOfficerUid: null
             }),
           )
           setEditTx(null)
@@ -239,10 +226,16 @@ useEffect(() => {
               value={String(editTx.amount)}
               onChange={(e) => setEditTx({ ...editTx, amount: Number(e.target.value) })}
             />
-            <Select label="Type" value={editTx.type} onChange={(e) => setEditTx({ ...editTx, type: e.target.value as any })}>
+            {editTx.subAccount && <Select label="Type" value={editTx.type} onChange={(e) => setEditTx({ ...editTx, type: e.target.value as any })}>
               <option value="DEBIT">DEBIT</option>
               <option value="CREDIT">CREDIT</option>
-            </Select>
+            </Select>}
+            {editTx.subAccount && <Select label='Sub Account' value={editTx.subAccount} onChange={(e) => setEditTx({ ...editTx, subAccount: e.target.value as any })} >
+              {subAccounts.map((subAccount) => { return (<option value={subAccount.name}>{subAccount.name}</option>) })}
+            </Select>}
+            {editTx.assignedOfficerUid && <Select label='Assign Officer' value={editTx.assignedOfficerUid} onChange={(e) => setEditTx({ ...editTx, assignedOfficerUid: e.target.value as any })} >
+              {officers.map((officer) => { return (<option value={officer.uid}>{officer.email}</option>) })}
+            </Select>}
             <div className="text-xs text-slate-500">
               Note: once an officer pays, you can’t edit. If declined, create a new transaction.
             </div>
