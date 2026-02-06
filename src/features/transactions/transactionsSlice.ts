@@ -37,7 +37,7 @@ export const clerkFetchMyTransactionsThunk = createAsyncThunk('transactions/cler
 
 export const clerkCreateTransactionThunk = createAsyncThunk(
   'transactions/clerkCreate',
-  async (args: { uid: string; date: string; description: string; amount: number; type: TransactionType, assignedOfficerUid: string }) => {
+  async (args: { uid: string; date: string; description: string; amount: number; type: TransactionType }) => {
     await createTransaction({ ...args, createdBy: args.uid })
     await logActivity(args.uid, 'transaction.create', undefined, { amount: args.amount })
   },

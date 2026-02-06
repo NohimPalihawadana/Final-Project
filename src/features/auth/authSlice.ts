@@ -5,7 +5,7 @@ import { auth } from '@/firebase/firebase'
 import { getDoc, ref, setDoc } from '@/firebase/firestore'
 
 type AuthState = {
-  bootstrapped: boolean
+  initialized: boolean
   user: { uid: string; email: string | null } | null
   profile: AppUser | null
   loading: boolean
@@ -13,18 +13,18 @@ type AuthState = {
 }
 
 const initialState: AuthState = {
-  bootstrapped: false,
+  initialized: false,
   user: null,
   profile: null,
   loading: false,
 }
 
-export const bootstrapAuthThunk = createAsyncThunk('auth/bootstrap', async () => {
-  const u = auth.currentUser
-  if (!u) return { user: null as AuthState['user'], profile: null as AppUser | null }
+export const authThunk = createAsyncThunk('auth', async () => {
+  const authUser = auth.currentUser
+  if (!authUser) return { user: null as AuthState['user'], profile: null as AppUser | null }
 
-  const user = { uid: u.uid, email: u.email }
-  const snap = await getDoc(ref(`users/${u.uid}`))
+  const user = { uid: authUser.uid, email: authUser.email }
+  const snap = await getDoc(ref(`users/${user.uid}`))
   const profile = snap.exists() ? (snap.data() as AppUser) : null
   return { user, profile }
 })
@@ -79,19 +79,19 @@ const slice = createSlice({
   reducers: {},
   extraReducers(builder) {
     builder
-      .addCase(bootstrapAuthThunk.pending, (s) => {
+      .addCase(authThunk.pending, (s) => {
         s.loading = true
         s.error = undefined
       })
-      .addCase(bootstrapAuthThunk.fulfilled, (s, a) => {
+      .addCase(authThunk.fulfilled, (s, a) => {
         s.loading = false
-        s.bootstrapped = true
+        s.initialized = true
         s.user = a.payload.user
         s.profile = a.payload.profile
       })
-      .addCase(bootstrapAuthThunk.rejected, (s, a) => {
+      .addCase(authThunk.rejected, (s, a) => {
         s.loading = false
-        s.bootstrapped = true
+        s.initialized = true
         s.error = a.error.message
         s.user = null
         s.profile = null
@@ -124,7 +124,7 @@ const slice = createSlice({
       .addCase(logoutThunk.fulfilled, (s) => {
         s.user = null
         s.profile = null
-        s.bootstrapped = true
+        s.initialized = true
       })
   },
 })

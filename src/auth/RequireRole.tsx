@@ -4,9 +4,9 @@ import { useAppSelector } from '@/app/hooks'
 import type { UserRole } from '@/types'
 
 export function RequireRole({ allowed, children }: { allowed: UserRole[]; children: React.ReactNode }) {
-  const { user, profile, bootstrapped } = useAppSelector((s) => s.auth)
+  const { user, profile, initialized } = useAppSelector((s) => s.auth)
 
-  if (!bootstrapped) {
+  if (!initialized) {
     return (
       <div className="page">
         <div className="card p-6">Loading…</div>

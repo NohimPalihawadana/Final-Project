@@ -2,9 +2,9 @@ import { Navigate } from 'react-router-dom'
 import { useAppSelector } from '@/app/hooks'
 
 export default function Home() {
-  const { user, profile, bootstrapped } = useAppSelector((s) => s.auth)
+  const { user, profile, initialized } = useAppSelector((s) => s.auth)
 
-  if (!bootstrapped) return null
+  if (!initialized) return null
   if (!user) return <Navigate to="/login" replace />
   if (!profile?.role) return <Navigate to="/account" replace />
 
@@ -16,7 +16,7 @@ export default function Home() {
     case 'ACCOUNT_MANAGER':
       return <Navigate to="/manager" replace />
     case 'ADMIN':
-      return <Navigate to="/admin" replace />
+      return <Navigate to="/doubleColumnLedger" replace />
     default:
       return <Navigate to="/account" replace />
   }

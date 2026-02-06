@@ -14,7 +14,8 @@ service cloud.firestore {
     }
 
     match /transactions/{id} {
-      allow read: if isSignedIn();
+      // Allow AUDITOR to read transactions
+      allow read: if isSignedIn() && (isAdmin() || hasRole('ACCOUNT_MANAGER') || hasRole('AUDITOR') || hasRole('CLERK') || hasRole('OFFICER'));
 
       allow create: if hasRole('CLERK');
 
@@ -37,7 +38,8 @@ service cloud.firestore {
     }
 
     match /financial-records/{month} {
-      allow read: if isSignedIn();
+      // Allow AUDITOR to read financial records
+      allow read: if isSignedIn() && (isAdmin() || hasRole('ACCOUNT_MANAGER') || hasRole('AUDITOR'));
       // Recommend: write only via Cloud Function, or Admin/Manager only.
       allow write: if isAdmin() || hasRole('ACCOUNT_MANAGER');
     }

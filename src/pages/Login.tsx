@@ -37,7 +37,10 @@ export default function Login() {
           nav('/manager')
           break
         case 'ADMIN':
-          nav('/admin')
+          nav('/doubleColumnLedger')
+          break
+        case 'AUDITOR':
+          nav('doubleColumnLedger')
           break
       }
     }
@@ -77,9 +80,7 @@ export default function Login() {
           </div>
         </form>
 
-        <div className="mt-4 text-sm text-slate-600">
-          No account? <Link className="text-slate-900 underline" to="/register">Register</Link>
-        </div>
+        
       </div>
     </div>
   )

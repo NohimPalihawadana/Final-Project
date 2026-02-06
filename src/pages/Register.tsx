@@ -51,7 +51,7 @@ export default function Register() {
             Register
           </Button>
         </form>
-
+        
         <div className="mt-4 text-sm text-slate-600">
           Already have an account? <Link className="text-slate-900 underline" to="/login">Login</Link>
         </div>

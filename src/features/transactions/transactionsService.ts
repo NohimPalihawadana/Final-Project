@@ -8,7 +8,6 @@ export async function createTransaction(args: {
   amount: number
   type: TransactionType
   createdBy: string
-  assignedOfficerUid: string
 }) {
   const status = args.type  === 'CREDIT' ? 'PAID' : 'PENDING';
   const now = Date.now()
@@ -19,7 +18,6 @@ export async function createTransaction(args: {
     type: args.type,
     status: status as TransactionStatus,
     createdBy: args.createdBy,
-    assignedOfficerUid: args.assignedOfficerUid,
     createdAt: now,
     updatedAt: now,
   })

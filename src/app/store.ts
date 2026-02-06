@@ -4,6 +4,7 @@ import transactionsReducer from '@/features/transactions/transactionsSlice'
 import usersReducer from '@/features/users/usersSlice'
 import recordsReducer from '@/features/records/recordsSlice'
 import activityReducer from '@/features/activity/activitySlice'
+import subAccountsReducer from "@/features/subAccounts/subAccountsSlice"
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     users: usersReducer,
     records: recordsReducer,
     activity: activityReducer,
+    subAccounts: subAccountsReducer,
   },
 })
 

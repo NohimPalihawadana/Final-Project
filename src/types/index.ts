@@ -1,4 +1,4 @@
-export type UserRole = 'CLERK' | 'OFFICER' | 'ACCOUNT_MANAGER' | 'ADMIN'
+export type UserRole = 'CLERK' | 'OFFICER' | 'ACCOUNT_MANAGER' | 'ADMIN' | 'AUDITOR'
 
 export type TransactionType = 'CREDIT' | 'DEBIT'
 export type TransactionStatus = 'PENDING' | 'PAID' | 'APPROVED' | 'DECLINED' | 'CLOSED'
@@ -49,6 +49,8 @@ export interface FinancialRecordEntry {
   description: string
   debit?: number
   credit?: number
+  subAccountId: string
+  subAccountName: string
 }
 
 export interface FinancialRecord {

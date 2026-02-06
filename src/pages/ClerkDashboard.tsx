@@ -72,7 +72,6 @@ useEffect(() => {
         description,
         amount: amt,
         type,
-        assignedOfficerUid: selectedOfficerUid
       }),
     )
     setDescription('')
@@ -101,23 +100,11 @@ useEffect(() => {
             <option value="DEBIT">DEBIT</option>
             <option value="CREDIT">CREDIT</option>
           </Select>
-          <Select
-            label="Assign Officer"
-            value={selectedOfficerUid}
-            onChange={(e) => setSelectedOfficerUid(e.target.value)}
-            required
-          >
-            {officers.length === 0 ? (
-              <option value="">No officers found</option>
-            ) : (
-              officers.map((o) => (
-                <option key={o.uid} value={o.uid}>
-                  {o.name || o.email}
-                </option>
-              ))
-            )}
-          </Select>
         </div>
+          <Select>
+            <option></option>
+            <option></option>
+          </Select>
 
         <div className="mt-4">
           <Button onClick={onCreate}>Create transaction</Button>

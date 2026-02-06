@@ -5,9 +5,13 @@ import Register from '@/pages/Register'
 import ClerkDashboard from '@/pages/ClerkDashboard'
 import OfficerDashboard from '@/pages/OfficerDashboard'
 import AccountManagerDashboard from '@/pages/AccountManagerDashboard'
-import AdminDashboard from '@/pages/AdminDashboard'
 import Account from '@/pages/Account'
 import { RequireRole } from '@/auth/RequireRole'
+import UserManagement from '@/pages/UserManagement'
+import ActivityLog from '@/pages/ActivityLog'
+import AuditorDashboard from '@/pages/AuditorDashboard'
+import DoubleColumnLedger from '@/pages/DoubleColumnLedger'
+import SubAccounts from '@/pages/SubAccounts'
 
 export function AppRoutes() {
   return (
@@ -15,6 +19,7 @@ export function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/account" element={<Account />} />
 
       <Route
         path="/clerk"
@@ -40,16 +45,43 @@ export function AppRoutes() {
           </RequireRole>
         }
       />
+      
       <Route
-        path="/admin"
+        path="/doubleColumnLedger"
         element={
-          <RequireRole allowed={['ADMIN']}>
-            <AdminDashboard />
+          <RequireRole allowed={['ADMIN', 'ACCOUNT_MANAGER', 'AUDITOR']}>
+            <DoubleColumnLedger />
           </RequireRole>
         }
       />
 
-      <Route path="/account" element={<Account />} />
+      <Route
+        path="/userManagement"
+        element={
+          <RequireRole allowed={['ADMIN']}>
+            <UserManagement />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/activityLog"
+        element={
+          <RequireRole allowed={['ADMIN']}>
+            <ActivityLog />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/subAccounts"
+        element={
+          <RequireRole allowed={['ADMIN']}>
+            <SubAccounts />
+          </RequireRole>
+        }
+      />
+
     </Routes>
   )
 }
