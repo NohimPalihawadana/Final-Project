@@ -49,7 +49,7 @@ export default function CreateOfficerTransaction({selectedOfficerId, officers}) 
             <div className="card p-6">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <div className="text-xl font-semibold">Clerk</div>
+                        <div className="text-xl font-semibold">Enter Officer Mess Bills</div>
                         <div className="mt-1 text-sm text-slate-600">Create transactions. You can edit only until it is paid.</div>
                     </div>
                     <Button variant="secondary" onClick={() => profile?.uid && dispatch(clerkFetchMyTransactionsThunk(profile.uid))} loading={loading}>

@@ -28,9 +28,9 @@ export default function DoubleColumnLedger() {
 
   useEffect(() => {
     dispatch(fetchUsersThunk())
-    dispatch(fetchActivityThunk())
+    // dispatch(fetchActivityThunk())
     dispatch(fetchMonthsThunk())
-    dispatch(fetchSubAccountsThunk())
+    // dispatch(fetchSubAccountsThunk())
   }, [dispatch])
 
   useEffect(() => {
@@ -38,6 +38,7 @@ export default function DoubleColumnLedger() {
   }, [months, selectedMonth])
 
   useEffect(() => {
+    console.log('=================lllll ', selectedMonth);
     if (selectedMonth) dispatch(fetchRecordThunk(selectedMonth))
   }, [dispatch, selectedMonth])
 

@@ -104,8 +104,6 @@ export async function declineTransaction(args: { id: string; managerUid: string;
   if (!txSnap.exists()) throw new Error('Transaction not found')
   const tx = txSnap.data() as Transaction
 
-  if (tx.status !== 'PAID') throw new Error('Only PAID can be declined')
-
   await updateDoc(ref(`transactions/${args.id}`), {
     status: 'DECLINED',
     approvedBy: args.managerUid,

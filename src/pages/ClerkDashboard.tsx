@@ -93,6 +93,8 @@ export default function ClerkDashboard() {
     await dispatch(clerkFetchMyTransactionsThunk(profile.uid))
   }
 
+  console.log('================+>>>>>> ', officers);
+
   return (
     <div className="page space-y-6">
       <CreateClerkTransaction subAccounts={subAccounts} selectedSubAccount ={subAccounts?.length ? subAccounts[0].name : ''} />
@@ -209,7 +211,7 @@ export default function ClerkDashboard() {
               amount: editTx.amount,
               type: editTx.type,
               subAccount: editTx.subAccount,
-              assignedOfficerUid: null
+              assignedOfficerUid: editTx?.assignedOfficerUid
             }),
           )
           setEditTx(null)
@@ -234,7 +236,7 @@ export default function ClerkDashboard() {
               {subAccounts.map((subAccount) => { return (<option value={subAccount.name}>{subAccount.name}</option>) })}
             </Select>}
             {editTx.assignedOfficerUid && <Select label='Assign Officer' value={editTx.assignedOfficerUid} onChange={(e) => setEditTx({ ...editTx, assignedOfficerUid: e.target.value as any })} >
-              {officers.map((officer) => { return (<option value={officer.uid}>{officer.email}</option>) })}
+              {officers.map((officer) => { return (<option value={officer.uid}>{officer.name}</option>) })}
             </Select>}
             <div className="text-xs text-slate-500">
               Note: once an officer pays, you can’t edit. If declined, create a new transaction.

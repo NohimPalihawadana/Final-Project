@@ -45,7 +45,7 @@ export const clerkCreateTransactionThunk = createAsyncThunk(
 
 export const clerkUpdateTransactionThunk = createAsyncThunk(
   'transactions/clerkUpdate',
-  async (args: { uid: string; id: string; date: string; description: string; amount: number; type: TransactionType, subAccount: string, assignedOfficerUid: string | null }) => {
+  async (args: { uid: string; id: string; date: string; description: string; amount: number; type: TransactionType, subAccount: string | null, assignedOfficerUid: string | null }) => {
     await updateTransactionEditableByClerk(args)
     await logActivity(args.uid, 'transaction.update', args.id)
   },

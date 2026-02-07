@@ -21,6 +21,7 @@ type TxDoc = {
   month: string // yyyy-mm
   subAccountId: string
   type: TxType
+  subAccount: string
   status: TxStatus
   createdAt: number
   updatedAt: number
@@ -33,19 +34,26 @@ type SubAccountDoc = {
   createdAt?: number
 }
 
-function monthToStartEnd(month: string): { startISO: string; endISO: string } {
-  // month = "2026-02"
-  const [yStr, mStr] = month.split('-')
-  const y = Number(yStr)
-  const m = Number(mStr)
+function getMonthStartAndEndISO(yearMonth) {
+  const [year, monthName] = yearMonth.split("-");
 
-  // start: yyyy-mm-01
-  const start = new Date(Date.UTC(y, m - 1, 1))
-  // end (inclusive): last day of month
-  const end = new Date(Date.UTC(y, m, 0)) // day 0 of next month = last day of current month
+  // Create start date (1st day of the month)
+  const startDate = new Date(`${monthName} 1, ${year}`);
 
-  const toISODate = (d: Date) => d.toISOString().slice(0, 10)
-  return { startISO: toISODate(start), endISO: toISODate(end) }
+  // Create end date (last day of the month)
+  const endDate = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth() + 1,
+    0
+  );
+
+  // Optional: set end date to end of day
+  endDate.setHours(23, 59, 59, 999);
+
+  return {
+    startISO: startDate.toISOString(),
+    endISO: endDate.toISOString(),
+  };
 }
 
 function prevMonth(month: string): string {
@@ -60,40 +68,32 @@ function prevMonth(month: string): string {
   return `${y}-${String(m).padStart(2, '0')}`
 }
 
-/**
- * Gets unique months from /transactions.month.
- * Note: Firestore doesn't support DISTINCT; this reads docs and dedupes client-side.
- * If your dataset gets huge, we can optimize later using a "months" collection.
- */
+function getYearMonth(dateString) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = date.toLocaleString("default", { month: "long" });
+
+  return `${year}-${month}`;
+}
+
+
 export async function fetchAvailableMonths(): Promise<string[]> {
   const txRef = collection(db, 'transactions')
-  const qy = query(txRef, orderBy('month', 'desc'))
+  const qy = query(txRef, orderBy('date', 'desc'))
 
   const snap = await getDocs(qy)
   const set = new Set<string>()
   snap.forEach((d) => {
     const data = d.data() as Partial<TxDoc>
-    if (data.month) set.add(data.month)
+    if (data?.date) {
+      const monthName = getYearMonth(data.date);
+      set.add(monthName);
+    }
   })
 
   return Array.from(set).sort((a, b) => (a < b ? 1 : -1))
 }
 
-async function fetchSubAccountNameMap(): Promise<Map<string, string>> {
-  const ref = collection(db, 'subAccounts')
-  const snap = await getDocs(ref)
-  const map = new Map<string, string>()
-  snap.forEach((d) => {
-    const data = d.data() as Partial<SubAccountDoc>
-    map.set(d.id, data.name || d.id)
-  })
-
-  // Ensure system IDs still show nicely even if not found
-  if (!map.has('cash')) map.set('cash', 'Cash')
-  if (!map.has('bank')) map.set('bank', 'Bank')
-
-  return map
-}
 
 function signedAmount(tx: TxDoc): number {
   // Accounting rule for overall ledger balance:
@@ -108,7 +108,7 @@ function signedAmount(tx: TxDoc): number {
  * - entries are month txs, each mapped to debit/credit columns and subAccountName
  */
 export async function fetchFinancialRecord(month: string): Promise<FinancialRecord> {
-  const { startISO, endISO } = monthToStartEnd(month)
+  const { startISO, endISO } = getMonthStartAndEndISO(month)
 
   const txRef = collection(db, 'transactions')
 
@@ -116,21 +116,20 @@ export async function fetchFinancialRecord(month: string): Promise<FinancialReco
   // If you later want APPROVED/PAID included too, tell me and we’ll adjust.
   const priorQ = query(
     txRef,
-    where('status', '==', 'CLOSED'),
+    where('status', 'in', ['PAID', 'CLOSED']),
     where('date', '<', startISO),
     orderBy('date', 'asc')
   )
 
   const monthQ = query(
     txRef,
-    where('status', '==', 'CLOSED'),
+    where('status', 'in', ['PAID', 'CLOSED']),
     where('date', '>=', startISO),
     where('date', '<=', endISO),
     orderBy('date', 'asc')
   )
 
-  const [subMap, priorSnap, monthSnap] = await Promise.all([
-    fetchSubAccountNameMap(),
+  const [priorSnap, monthSnap] = await Promise.all([
     getDocs(priorQ),
     getDocs(monthQ),
   ])
@@ -154,8 +153,7 @@ export async function fetchFinancialRecord(month: string): Promise<FinancialReco
       description: tx.description,
       debit: tx.type === 'DEBIT' ? tx.amount : undefined,
       credit: tx.type === 'CREDIT' ? tx.amount : undefined,
-      subAccountId: tx.subAccountId,
-      subAccountName: subMap.get(tx.subAccountId) ?? tx.subAccountId,
+      subAccountName: tx.subAccount,
     })
   })
 

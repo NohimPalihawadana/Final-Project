@@ -31,7 +31,7 @@ export interface Transaction {
   status: TransactionStatus
 
   createdBy: string
-  assignedOfficerUid?: string
+  assignedOfficerUid: string | null
   paidBy?: string
   approvedBy?: string
 
@@ -40,7 +40,7 @@ export interface Transaction {
   createdAt: number
   updatedAt: number
 
-  subAccount: string
+  subAccount: string | null
 }
 
 export interface ActivityLog {
@@ -58,7 +58,6 @@ export interface FinancialRecordEntry {
   description: string
   debit?: number
   credit?: number
-  subAccountId: string
   subAccountName: string
 }
 
