@@ -13,6 +13,7 @@ import AuditorDashboard from '@/pages/AuditorDashboard'
 import DoubleColumnLedger from '@/pages/DoubleColumnLedger'
 import SubAccounts from '@/pages/SubAccounts'
 import PendingApprovals from '@/pages/PendingApprovals'
+import ClerkTransaction from '@/pages/ClerkTransaction'
 
 export function AppRoutes() {
   return (
@@ -30,6 +31,16 @@ export function AppRoutes() {
           </RequireRole>
         }
       />
+
+      <Route
+        path="/clerk/records"
+        element={
+          <RequireRole allowed={['CLERK']}>
+            <ClerkTransaction />
+          </RequireRole>
+        }
+      />
+
       <Route
         path="/officer"
         element={

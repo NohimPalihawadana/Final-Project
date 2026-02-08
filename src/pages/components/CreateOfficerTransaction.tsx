@@ -33,7 +33,7 @@ export default function CreateOfficerTransaction({selectedOfficerId, officers}) 
                 date,
                 description,
                 amount: amt,
-                type: "DEBIT",
+                type: "CREDIT",
                 subAccount: null,
                 assignedOfficerUid: selectedOfficerUid
             }),

@@ -29,13 +29,12 @@ function getMenuItems(role?: string): MenuItem[] {
     case 'OFFICER':
       return [
         { label: 'Officer Dashboard', path: '/officer' },
-        { label: 'Mess Records', path: '/officer/records' },
         { label: 'My Profile', path: '/account' },
       ]
     case 'CLERK':
       return [
         { label: 'Clerk Dashboard', path: '/clerk' },
-        { label: 'Mess Records', path: '/clerk/records' },
+        { label: 'My Transactions', path: '/clerk/records' },
         { label: 'My Profile', path: '/account' },
       ]
     case 'AUDITOR':

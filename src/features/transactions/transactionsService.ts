@@ -62,7 +62,7 @@ export async function markPaid(args: { id: string; officerUid: string }) {
     throw new Error('Not assigned to you')
   }
 
-  if (tx.type !== 'DEBIT') {
+  if (tx.type !== 'CREDIT') {
     throw new Error('Only DEBIT transactions require payment')
   }
 
