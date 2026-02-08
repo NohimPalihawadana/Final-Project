@@ -12,6 +12,10 @@ export default function OfficerDashboard() {
   const { profile } = useAppSelector((s) => s.auth)
   const { officerPending, officerPaid, loading, error } = useAppSelector((s) => s.transactions)
 
+  const authUid = useAppSelector((state) => state.auth.user?.uid)
+  const users = useAppSelector((state) => state.users.items)
+  const currentUser = users.find((u) => u.uid === authUid)
+
   useEffect(() => {
     if (profile?.uid) dispatch(officerFetchThunk(profile.uid))
   }, [dispatch, profile?.uid])
@@ -19,16 +23,10 @@ export default function OfficerDashboard() {
   return (
     <div className="page space-y-6">
       <div className="card p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-xl font-semibold">Officer</div>
-            <div className="mt-1 text-sm text-slate-600">Pay pending transactions.</div>
-          </div>
-          <Button variant="secondary" onClick={() => profile?.uid && dispatch(officerFetchThunk(profile.uid))} loading={loading}>
-            Refresh
-          </Button>
+        <div className="text-xl font-semibold">{currentUser?.role}</div>
+        <div className="mt-1 text-sm text-slate-600">
+          Hello, {currentUser?.name ?? 'Officer'} !!
         </div>
-        {error ? <div className="mt-3 text-sm text-rose-600">{error}</div> : null}
       </div>
 
       <div className="card p-6">

@@ -26,7 +26,7 @@ export default function ActivityLog() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-lg font-semibold">Activity log</div>
-            <div className="mt-1 text-sm text-slate-600">Latest actions (client-logged; production: server logged recommended).</div>
+            <div className="mt-1 text-sm text-slate-600">You can see all user actions here.</div>
           </div>
           <Button variant="secondary" onClick={() => dispatch(fetchActivityThunk())}>Refresh</Button>
         </div>

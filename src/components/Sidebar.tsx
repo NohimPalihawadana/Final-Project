@@ -23,7 +23,7 @@ function getMenuItems(role?: string): MenuItem[] {
     case 'ACCOUNT_MANAGER':
       return [
         { label: 'Dashboard', path: '/manager' },
-        { label: 'Reports', path: '/manager/reports' },
+        { label: 'Pending Approvals', path: '/pendingApprovals' },
         { label: 'My Profile', path: '/account' },
       ]
     case 'OFFICER':

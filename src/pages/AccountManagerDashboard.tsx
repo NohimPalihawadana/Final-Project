@@ -1,14 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { managerApproveThunk, managerDeclineThunk, managerFetchThunk } from '@/features/transactions/transactionsSlice'
+import { managerFetchThunk } from '@/features/transactions/transactionsSlice'
 import { fetchMonthsThunk, fetchRecordThunk } from '@/features/records/recordsSlice'
 import { Button } from '@/components/Button'
 import { Table, Td, Th } from '@/components/Table'
-import { Badge } from '@/components/Badge'
-import { formatISODate, monthKeyFromISODate } from '@/utils/date'
+import { formatISODate } from '@/utils/date'
 import { formatMoney } from '@/utils/currency'
-import { Modal } from '@/components/Modal'
-import { Input } from '@/components/Input'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { Select } from '@/components/Select'
@@ -16,13 +13,13 @@ import { Select } from '@/components/Select'
 export default function AccountManagerDashboard() {
   const dispatch = useAppDispatch()
   const { profile } = useAppSelector((s) => s.auth)
-  const { managerPaid, loading, error } = useAppSelector((s) => s.transactions)
   const { months, current } = useAppSelector((s) => s.records)
 
-  const [declineTxId, setDeclineTxId] = useState<string | null>(null)
-  const [declineReason, setDeclineReason] = useState('')
-
   const [selectedMonth, setSelectedMonth] = useState<string>('')
+
+  const authUid = useAppSelector((state) => state.auth.user?.uid)
+  const users = useAppSelector((state) => state.users.items)
+  const currentUser = users.find((u) => u.uid === authUid)
 
   useEffect(() => {
     if (profile?.uid) dispatch(managerFetchThunk(profile.uid))
@@ -37,11 +34,6 @@ export default function AccountManagerDashboard() {
     if (selectedMonth) dispatch(fetchRecordThunk(selectedMonth))
   }, [dispatch, selectedMonth])
 
-  const monthHint = useMemo(() => {
-    if (!managerPaid.length) return null
-    const m = monthKeyFromISODate(managerPaid[0].date)
-    return m
-  }, [managerPaid])
 
   const printPdf = () => {
     if (!current) return alert('No record for selected month')
@@ -77,69 +69,12 @@ export default function AccountManagerDashboard() {
   return (
     <div className="page space-y-6">
       <div className="card p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-xl font-semibold">Account Manager</div>
-            <div className="mt-1 text-sm text-slate-600">Approve or decline PAID transactions. Printing available for ledger.</div>
-            {monthHint ? <div className="mt-2 text-xs text-slate-500">Tip: approving creates/updates ledger for month {monthHint}.</div> : null}
-          </div>
-          <Button variant="secondary" onClick={() => profile?.uid && dispatch(managerFetchThunk(profile.uid))} loading={loading}>
-            Refresh
-          </Button>
+        <div className="text-xl font-semibold"><label>{currentUser?.role}</label></div>
+        <div className="mt-1 text-sm text-slate-600">
+          Hello, {currentUser?.name ?? 'Account Manager'} !!
         </div>
-        {error ? <div className="mt-3 text-sm text-rose-600">{error}</div> : null}
       </div>
 
-      <div className="card p-6">
-        <div className="text-lg font-semibold">Pending approvals (PAID)</div>
-        <div className="mt-4">
-          <Table>
-            <thead>
-              <tr>
-                <Th>Date</Th>
-                <Th>Description</Th>
-                <Th>Amount</Th>
-                <Th>Status</Th>
-                <Th>Actions</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {managerPaid.map((t) => (
-                <tr key={t.id}>
-                  <Td>{formatISODate(t.date)}</Td>
-                  <Td>{t.description}</Td>
-                  <Td>{formatMoney(t.amount)}</Td>
-                  <Td><Badge text="PENDING" tone="warning" /></Td>
-                  <Td>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          if (!profile?.uid) return
-                          await dispatch(managerApproveThunk({ uid: profile.uid, id: t.id }))
-                          await dispatch(managerFetchThunk(profile.uid))
-                          dispatch(fetchMonthsThunk())
-                        }}
-                      >
-                        Approve
-                      </Button>
-                      <Button size="sm" variant="danger" onClick={() => setDeclineTxId(t.id)}>
-                        Decline
-                      </Button>
-                    </div>
-                  </Td>
-                </tr>
-              ))}
-              {managerPaid.length === 0 ? (
-                <tr>
-                  <Td><span className="text-slate-500">No PAID transactions.</span></Td>
-                  <Td /><Td /><Td /><Td />
-                </tr>
-              ) : null}
-            </tbody>
-          </Table>
-        </div>
-      </div>
 
       <div className="card p-6">
         <div className="flex items-center justify-between gap-3">
@@ -207,28 +142,6 @@ export default function AccountManagerDashboard() {
           )}
         </div>
       </div>
-
-      <Modal
-        open={!!declineTxId}
-        title="Decline transaction"
-        onClose={() => {
-          setDeclineTxId(null)
-          setDeclineReason('')
-        }}
-        onConfirm={async () => {
-          if (!profile?.uid || !declineTxId) return
-          if (!declineReason.trim()) return alert('Reason is required')
-          await dispatch(managerDeclineThunk({ uid: profile.uid, id: declineTxId, reason: declineReason }))
-          setDeclineTxId(null)
-          setDeclineReason('')
-          await dispatch(managerFetchThunk(profile.uid))
-        }}
-        confirmText="Decline"
-        confirmVariant="danger"
-      >
-        <Input label="Reason" value={declineReason} onChange={(e) => setDeclineReason(e.target.value)} placeholder="Enter reason for decline" />
-        <div className="mt-2 text-xs text-slate-500">Clerk will see the reason under Declined list.</div>
-      </Modal>
     </div>
   )
 }

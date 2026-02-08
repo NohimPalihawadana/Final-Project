@@ -40,7 +40,7 @@ export default function Login() {
           nav('/doubleColumnLedger')
           break
         case 'AUDITOR':
-          nav('doubleColumnLedger')
+          nav('/doubleColumnLedger')
           break
       }
     }

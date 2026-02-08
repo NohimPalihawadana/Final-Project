@@ -12,6 +12,7 @@ import ActivityLog from '@/pages/ActivityLog'
 import AuditorDashboard from '@/pages/AuditorDashboard'
 import DoubleColumnLedger from '@/pages/DoubleColumnLedger'
 import SubAccounts from '@/pages/SubAccounts'
+import PendingApprovals from '@/pages/PendingApprovals'
 
 export function AppRoutes() {
   return (
@@ -78,6 +79,15 @@ export function AppRoutes() {
         element={
           <RequireRole allowed={['ADMIN']}>
             <SubAccounts />
+          </RequireRole>
+        }
+      />
+
+      <Route
+        path="/pendingApprovals"
+        element={
+          <RequireRole allowed={['ACCOUNT_MANAGER']}>
+            <PendingApprovals />
           </RequireRole>
         }
       />

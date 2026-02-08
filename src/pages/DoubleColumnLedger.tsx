@@ -123,7 +123,7 @@ export default function DoubleColumnLedger() {
   return (
     <div className="page space-y-6">
       <div className="card p-6">
-        <div className="text-xl font-semibold">Admin</div>
+        <div className="text-xl font-semibold">{currentUser?.role}</div>
         <div className="mt-1 text-sm text-slate-600">
           Hello, {currentUser?.name ?? 'Admin'} !!
         </div>
