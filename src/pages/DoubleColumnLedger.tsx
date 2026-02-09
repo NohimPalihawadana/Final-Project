@@ -228,7 +228,7 @@ export default function DoubleColumnLedger() {
                 </tbody>
               </Table>
 
-              {/* ✅ Print button bottom-left */}
+              
               <div className="flex justify-start pt-2">
                 <Button onClick={onPrintPdf} disabled={!current || loading}>
                   Print PDF
